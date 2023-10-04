@@ -1,5 +1,6 @@
 import os
 from sage.stats.distributions.discrete_gaussian_lattice import DiscreteGaussianDistributionLatticeSampler
+from sage.crypto.mq.rijndael_gf import RijndaelGF
 import sage.matrix.matrix_integer_dense_hnf as HNF
 
 from sage.misc.trace import trace
@@ -145,7 +146,7 @@ class LatticePair:
 
 		return 1
 
-class KEM:
+class IND_CPA_KEM:
 
 	def __init__(self, latticePair):
 		self.latticePair = latticePair
@@ -338,7 +339,19 @@ class KEM:
 		# Return key
 		return k
 
-# for i in range(1, 8):
+
+class IND_CPA_PKE:
+
+	def __init__(self, IND_CPA_KEM):
+		self.IND_CPA_KEM = IND_CPA_KEM
+
+	def GenerateKeyPair(self):
+		return self.IND_CPA_KEM.GenerateKeyPair()
+
+	def Encrypt(self, pk, message):
+		encap, k = self.IND_CPA_KEM.EncapsulateKey(pk)
+
+
 B, shortest_vector_length, decoding_distance = BW.BarnesWall(4)
 B = BW.BasisOverZZ(B)
 latticePair = LatticePair(B, shortest_vector_length, decoding_distance)
@@ -349,58 +362,3 @@ while True:
 	ch, k = kem.EncapsulateKey(pk)
 	k2 = kem.DecapsulateKey(sk, ch)
 	assert k == k2
-
-#trace("LatticePair(B, shortest_vector_length, decoding_distance)")             # not tested
-#time LatticePair(B, shortest_vector_length, decoding_distance)
-
-
-
-
-# N, N = latticePair.BQ.dimensions()
-# print("N", N)
-# latticePair.PublicKeySize()
-# latticePair.SecretKeySize()
-# latticePair.EncapsulatedKeySize()
-# latticePair.EstimateBDDHardness()
-
-# kem = KEM(latticePair)
-# pk, sk = kem.GenerateKeyPair()
-# print("pk")
-# print(pk)
-# print("sk")
-# print(sk)
-# ch, k = kem.EncapsulateKey(pk)
-# k = kem.DecapsulateKey(sk, ch)
-# print("+------------------------------------_+")
-
-
-
-# s = latticePair.s
-# N, N = B.dimensions()
-# S = matrix(ZZ, N, N, [[ 1,  1,  0, -1],
-# 					  [ 1,  0, -1,  1],
-# 					  [ 0, -1,  1,  1],
-# 					  [ 0, -1,  1, -1]])
-# KEM.Extract(B, S)
-
-# S = matrix(ZZ, N, N, [[-2,-3,-2, 3],
-# 					  [ 0, 1, 4,-1],
-# 					  [-2, 2, 0,-2],
-# 					  [ 0, 0, 0,-4]])
-# KEM.Extract(B, S)
-
-# S = matrix(ZZ, N, N, [[ -9, 11, -5, -9],
-# 					  [ -6,  8, 18,-13],
-# 					  [  3,  6, -7, 17],
-# 					  [ -3,  2,  7, 11]])
-# KEM.Extract(B, S)
-# for _ in range(20000):
-#  	R = KEM.SampleQuadraticForm(latticePair.BQ, s)
-
-# kem = KEM(latticePair)
-
-# print(latticePair.BQ)
-
-# pk, sk = kem.GenerateKeyPair()
-# encap, k = kem.EncapsulateKey(pk)
-# k = kem.DecapsulateKey(sk, encap)
