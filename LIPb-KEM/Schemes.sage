@@ -1,5 +1,6 @@
 import os
 from sage.stats.distributions.discrete_gaussian_lattice import DiscreteGaussianDistributionLatticeSampler
+from sage.crypto.mq.rijndael_gf import RijndaelGF
 import sage.matrix.matrix_integer_dense_hnf as HNF
 
 from sage.misc.trace import trace
@@ -16,25 +17,27 @@ os.system('sage --preparse BW.sage')
 os.system('mv BW.sage.py BW.py')
 import BW as BW
 
+os.system('sage --preparse LaTeX.sage')
+os.system('mv LaTeX.sage.py LaTeX.py')
+import LaTeX as LaTeX
+
+
 class LatticePair:
 
-	def __init__(self, B, shortest_vector_length, decoding_distance):
-		self.shortest_vector_length = shortest_vector_length
-		self.decoding_distance = decoding_distance
-		self.BQ, self.BS, self.g = self.__build_pair(B, shortest_vector_length)
-		self.s, self.q = self.__compute_parameters(self.BQ, shortest_vector_length, decoding_distance)
-		self.SIS = self.__compute_SIS_parameters(self.BQ, self.q, decoding_distance)
+	def __init__(self, B, shortest_vector_length, decoding_distance, g):
+		self.shortest_vector_length = g * shortest_vector_length
+		self.decoding_distance = g * decoding_distance
+		self.BS, self.BQ, self.g = self.__build_pair(B, g)
+		self.s, self.q = self.__compute_parameters(self.BS, self.shortest_vector_length, self.decoding_distance)
+		self.SIS = self.__compute_SIS_parameters(self.BS, self.q, self.decoding_distance)
 
-	def __build_pair(self, B, shortest_vector_length):
-		gap = Utils.IntegralLatticeGap(B, shortest_vector_length)
-		g = ZZ(ceil(min(gap^2, 16 * sqrt(2))))
-
-		BQ = block_matrix([[B,				 0],
-						   [0,   g*(g + 1) * B]])
+	def __build_pair(self, B, g):
 		BS = block_matrix([[g * B,			 0],
 						   [	0, (g + 1) * B]])
+		BQ = block_matrix([[B,				 0],
+						   [0,   g*(g + 1) * B]])
 
-		return (BQ, BS, g)
+		return (BS, BQ, g)
 
 	def __compute_parameters(self, B, shortest_vector_length, decoding_distance):
 		N, N = B.dimensions()
@@ -53,76 +56,58 @@ class LatticePair:
 		N, N = B.dimensions()
 
 		# extractor function dimension 'm'. Values were chose so that 'l' is 'theta(n)'' bouded.
-		M = ZZ(ceil(sqrt(N)))
+		M = ZZ(ceil(sqrt(N)/2))
+		#M = ZZ(ceil(sqrt(N)/1.5))
 
 		# extractor function moduli (TODO)
 		# q_ = next_prime(ceil(2*q*rho * sqrt(n * log(n))))
-		moduli = next_prime(floor(2^(N/M + M)))
+
+		# THIS IS THE RIGHT ONE
+		moduli = previous_prime(ceil(2^(N/(2*M)) / 3))
+		#moduli = next_prime(floor(2^((N + log(M, 2))/(2*M))))
 
 		beta = 2 * q * decoding_distance
 		return (M, N, moduli, beta)
 
 	def PublicKeySize(self):
-		N, N = self.BQ.dimensions()
+		N, N = self.BS.dimensions()
 		# This is the maximum length of the vectors in the generating set S
 		lenS = self.s * sqrt(N)
 
-		inBytes = 0
+		inBits = 0
 		for i in range(N):
 			for j in range(i+1):
 				# These are the length of the i-th vector and j-th vector in the basis R that generates the Gram Matrix of the public key
 				lenA = max(sqrt(i)/2 * lenS, lenS)
 				lenB = max(sqrt(j)/2 * lenS, lenS)
 				# By definition of Gram Matrix, G(i, j) = < R(i), R(j) > <= |R(i)| * |R(j)|
-				inBytes += ZZ(ceil(log(lenA * lenB, 2)))
-
-		print("PK", inBytes, "b")
-		inBytes = inBytes / 8
-		print("PK", inBytes, "B")
-		inBytes = inBytes / 1024
-		print("PK", inBytes, "KB")
-		inBytes = inBytes / 1024
-		print("PK", inBytes, "MB")
-		inBytes = inBytes / 1024
-		print("PK", inBytes, "GB")
-		return inBytes
+				inBits += ZZ(ceil(log(lenA * lenB, 2)))
+		return inBits
 
 	def SecretKeySize(self):
-		N, N = self.BQ.dimensions()
+		N, N = self.BS.dimensions()
 		# This is the maximum length of the vectors in the generating set S
 		lenS = self.s * sqrt(N)
 
-		inBytes = N * ZZ(ceil(log(lenS, 2)))
-		print("SK", inBytes, "b")
-		inBytes = inBytes / 8
-		print("SK", inBytes, "B")
-		inBytes = inBytes / 1024
-		print("SK", inBytes, "KB")
-		inBytes = inBytes / 1024
-		print("SK", inBytes, "MB")
-		inBytes = inBytes / 1024
-		print("SK", inBytes, "GB")
+		inBits = N * ZZ(ceil(log(lenS, 2)))
+		return inBits
 
-	def EncapsulatedKeySize(self):
-		N, N = self.BQ.dimensions()
-		# This is the maximum length of the vectors in the generating set S
-
-		inBytes = N * ZZ(ceil(log(self.q, 2))) + 256
-		print("CH", inBytes, "b")
-		inBytes = inBytes / 8
-		print("CH", inBytes, "B")
-		inBytes = inBytes / 1024
-		print("CH", inBytes, "KB")
-		inBytes = inBytes / 1024
-		print("CH", inBytes, "MB")
-		inBytes = inBytes / 1024
-		print("CH", inBytes, "GB")
+	def EncapsulatedKeySize(self, seed_length=256):
+		N, N = self.BS.dimensions()
+		inBits = N * ZZ(ceil(log(self.q, 2))) + seed_length
+		return inBits
 
 	def EstimateBDDHardness(self):
-		N, N = self.BQ.dimensions()
-		det = self.LargestDeterminantInSUVPReduction(self.BQ, self.decoding_distance)
+		N, N = self.BS.dimensions()
+		det = self.LargestDeterminantInSUVPReduction(self.BS, self.decoding_distance)
 		beta = self.EstimateBetaForSUVP(det, N + 1)
-		print("BETA", beta)
+		coreSVPHardness = log(beta, 2) + 0.292 * beta
+		return beta, coreSVPHardness
+		#print("BETA", beta)
+
+	def KeySize(self):
+		SISm, _, SISq, _ = self.SIS
+		return SISm * ceil(log(SISq, 2)) 
 
 	def LargestDeterminantInSUVPReduction(self, B, rho):
 		return B.det() * rho
@@ -136,6 +121,10 @@ class LatticePair:
 				return b
 		return dim
 
+	def SmoothingParameterAssumption(self):
+		N = self.BS.dimensions()[0]
+		return self.decoding_distance / (2 * sqrt(N))
+
 	def Compare(self, a, b, epsilon):
 		if abs(a - b) <= epsilon:
 			return 0
@@ -145,7 +134,42 @@ class LatticePair:
 
 		return 1
 
-class KEM:
+	def SanityCheck(self, fail_on_assert = True):
+		SISm, SISn, SISq, SISbeta = self.SIS
+
+		if fail_on_assert:
+			"""
+				There are two main restrictions for the randomness extractor.
+				(i) SISq must be greater than 2 * SISbeta, so that the proof of universial hash function holds.
+				(ii) SISq must be a prime.
+
+				More presisely, every integer in {-2 * beta, ..., -1, 1, ..., 2 * beta} must have an inverse (mod SISq)
+			"""
+			assert SISq > SISbeta
+			assert SISq in Primes()
+
+			n, n = self.BS.dimensions()
+			"""
+			For the statistical distance from the random bits to the uniform distribution to be negligible,
+			we require SISn >= 2*SISM * log(SISq, 2)
+			"""
+			assert SISn >= 2 * SISm * log(SISq, 2)
+
+			"""
+			The key secretly shared through the encapsulation mechanism must be smaller than r - log2(3), where r is the rank
+			of the underlying Barnes-Wall latttice
+			"""
+			r = n/2
+			k = self.KeySize()
+			assert k <= r - log(3, 2)
+			return True
+
+		try:
+			return self.SanityCheck(fail_on_assert=True)
+		except AssertionError:
+			return False
+
+class IND_CPA_KEM:
 
 	def __init__(self, latticePair):
 		self.latticePair = latticePair
@@ -245,7 +269,7 @@ class KEM:
 
 	def GenerateKeyPair(self):
 		print("GENERATE")
-		B = self.latticePair.BQ
+		B = self.latticePair.BS
 		s = self.latticePair.s
 		R, U, S = KEM.SampleQuadraticForm(B, s)
 		assert U.det() == 1 or U.det() == -1
@@ -292,14 +316,14 @@ class KEM:
 		S = secret_key
 
 		# Utils information
-		BQ = self.latticePair.BQ
+		BS = self.latticePair.BS
 		q = self.latticePair.q
 		g = self.latticePair.g
 		rho = self.latticePair.decoding_distance
 		SISm, _, SISq, _ = self.latticePair.SIS
 
 		# Extract secret uniform transformation
-		P, U = KEM.Extract(BQ, S)
+		P, U = KEM.Extract(BS, S)
 
 		# U*c returns the coefficients of the vector we must decode.
 		# By multiplying it by BQ, we obtain the actual vector.
@@ -328,7 +352,7 @@ class KEM:
 		Ring = IntegerModRing(SISq)
 		A = KEM.SampleA(seed, SISm, N, Ring)
 
-		Q = BQ.transpose() * BQ
+		Q = BS.transpose() * BS
 		P = U.transpose() * Q * U
 		
 		determinant = sqrt(P.det())
@@ -338,7 +362,83 @@ class KEM:
 		# Return key
 		return k
 
-# for i in range(1, 8):
+def aes128():
+	return aes(128, 10)
+
+def aes192():
+	return aes(192, 12)
+
+def aes256():
+	return aes(256, 14)
+
+def aes(key_size, rounds, BLOCK_SIZE=128):
+	nB = BLOCK_SIZE / 32
+	"""
+	 AES-128 uses 12 rounds, and there is a 4x4 byte array.
+	 Meaning, every element in the array belong to F_{2^8}.
+	"""
+	return mq.SR(rounds, 4, nB, 8, star=True, allow_zero_inversions=True)
+
+class IND_CPA_PKE:
+
+	def __init__(self, IND_CPA_KEM, AES_KEY_LENGTH):
+		self.IND_CPA_KEM = IND_CPA_KEM
+
+		if AES_KEY_LENGTH >= 256:
+			self.AES = aes256()
+
+		elif AES_KEY_LENGTH >= 192:
+			self.AES = aes192()
+
+		elif AES_KEY_LENGTH >= 128:
+			self.AES = aes128()
+
+	def __to_aes_key(self, k):
+		key_bit_length = self.IND_CPA_KEM.latticePair.KeySize()
+		hex_length = ceil(key_bit_length / 2)
+		cut = self.AES_KEY_LENGTH/4
+		aes_key = "".join([("{:0" + hex_length + "x}").format(x) for x in k])[0:cut+1]
+		return aes_key
+
+	def GenerateKeyPair(self):
+		return self.IND_CPA_KEM.GenerateKeyPair()
+
+	def Encrypt(self, pk, message, FORMAT="hex"):
+		encap, k = self.IND_CPA_KEM.EncapsulateKey(pk)
+		aes_key = self.__to_aes_key(k)
+
+		if FORMAT == "string"
+			message = "".join("{:02x}".format(ord(c)) for c in message)
+
+		cipher = self.AES(message, aes_key)
+
+		return (cipher, encap)
+
+	def Decrypt(self, sk, cipher, encap):
+		k = self.IND_CPA_KEM.DecapsulateKey(sk, encap)
+		aes_key = self.__to_aes_key(k)
+
+		plain = self.AES(cipher, aes_key)
+		return plain;
+
+# class IND_CCA_KEM:
+
+# 	def __init__(self, IND_CPA_PKE):
+# 		self.IND_CPA_PKE = IND_CPA_PKE
+
+# 	def GenerateKeyPair(self):
+# 		pass
+
+# 	def EncapsulateKey(self, pk):
+# 		pass
+
+# 	def DecapsulateKey(self, sk, encap):
+# 		pass
+
+############################################################
+####       TEST - IND-CPA KEM WORKING                   ####
+############################################################
+
 B, shortest_vector_length, decoding_distance = BW.BarnesWall(4)
 B = BW.BasisOverZZ(B)
 latticePair = LatticePair(B, shortest_vector_length, decoding_distance)
@@ -350,11 +450,87 @@ while True:
 	k2 = kem.DecapsulateKey(sk, ch)
 	assert k == k2
 
-#trace("LatticePair(B, shortest_vector_length, decoding_distance)")             # not tested
+############################################################
+####       TEST - Table parameters                      ####
+############################################################
+SanityCheck = True
+
+latex_security = LaTeX.SecurityOutput()
+latex_parameters = LaTeX.ParameterOutput()
+
+securityCaption = "Comparison of security levels and key sizes between our KEM and NewHope, where $| \\pk |$ is the public key size, $| \\sk |$ is the secret key size, $| \\textit{ch} |$ is the encapsulated key size, $\\beta$ is the blocksize, and $\\lambda$ is the number of operations needed to break the scheme using classical algorithms."
+parameterCaption = "Suggested parameter sets for our concrete KEM based on LIP."
+
+latex_security.BeginTable(securityCaption)
+latex_security.MakeHeader()
+
+latex_parameters.BeginTable(parameterCaption)
+latex_parameters.MakeHeader()
+
+
+dimensions = [512, 1024]
+gs = [2, 4, 8, 12]
+
+import logging
+
+for g in gs:
+
+	for dim in dimensions:
+		logging.warning("Begin computing parameter set (" + str(dim) + ", " + str(g) + ")")
+		i = int(log(dim/4, 2))
+
+		B, shortest_vector_length, decoding_distance = BW.BarnesWall(i)
+		B = BW.BasisOverZZ(B)
+		latticePair = LatticePair(B, shortest_vector_length, decoding_distance, g)
+
+		#dim, dim = latticePair.BS.dimensions()
+		parameter_set = "OurBW" + str(int(dim/2)) + "g" + str(g)
+		
+		if SanityCheck:
+			if not latticePair.SanityCheck(fail_on_assert=False):
+				print(parameter_set + " failed SanityCheck")
+
+		pk_in_bits = latticePair.PublicKeySize()
+		sk_in_bits = latticePair.SecretKeySize()
+		ch_in_bits = latticePair.EncapsulatedKeySize()
+		k_in_bits = latticePair.KeySize()
+
+		beta, security = latticePair.EstimateBDDHardness()
+		if g >= 12:
+			assumption = None
+		else:
+			assumption = latticePair.SmoothingParameterAssumption()
+		
+		BWdim, BWdim = B.dimensions()
+
+		lattice = "\\BW_{" + str(BWdim) + "}"
+
+		SISm, SISn, SISq, SISbeta = latticePair.SIS
+
+		latex_security.MakeRow(parameter_set, dim, pk_in_bits, sk_in_bits, ch_in_bits, beta, security, assumption)
+		latex_parameters.MakeRow(parameter_set, lattice, dim, g, latticePair.s, latticePair.q, SISq, SISm, SISbeta, k_in_bits)
+
+		logging.warning("End computing parameter set (" + str(dim) + ", " + str(g) + ")")
+
+latex_security.EndTable()
+latex_security.Print()
+
+latex_parameters.EndTable()
+latex_parameters.Print()
+
+# B, shortest_vector_length, decoding_distance = BW.BarnesWall(4)
+# B = BW.BasisOverZZ(B)
+# latticePair = LatticePair(B, shortest_vector_length, decoding_distance)
+# N, N = latticePair.BQ.dimensions()
+# kem = KEM(latticePair)
+# while True:
+# 	pk, sk = kem.GenerateKeyPair()
+# 	ch, k = kem.EncapsulateKey(pk)
+# 	k2 = kem.DecapsulateKey(sk, ch)
+# 	assert k == k2
+
+#trace("LatticePair(B, shortest_vector_length, decoding_distance)")			 # not tested
 #time LatticePair(B, shortest_vector_length, decoding_distance)
-
-
-
 
 # N, N = latticePair.BQ.dimensions()
 # print("N", N)
@@ -393,6 +569,7 @@ while True:
 # 					  [ -6,  8, 18,-13],
 # 					  [  3,  6, -7, 17],
 # 					  [ -3,  2,  7, 11]])
+
 # KEM.Extract(B, S)
 # for _ in range(20000):
 #  	R = KEM.SampleQuadraticForm(latticePair.BQ, s)
