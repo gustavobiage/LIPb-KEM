@@ -1,0 +1,70 @@
+(12, 512, 880729, 54880*sqrt(2))
+k = 240
+(12, 512, 880729, 54880*sqrt(2))
+k = 240
+(16, 1024, 1431655751, 239328)
+k = 496
+(16, 1024, 1431655751, 239328)
+k = 496
+(12, 512, 880729, 91456*sqrt(2))
+k = 240
+(12, 512, 880729, 91456*sqrt(2))
+k = 240
+(16, 1024, 1431655751, 398912)
+k = 496
+(16, 1024, 1431655751, 398912)
+k = 496
+(12, 512, 880729, 163584*sqrt(2))
+k = 240
+(12, 512, 880729, 163584*sqrt(2))
+k = 240
+(16, 1024, 1431655751, 718080)
+k = 496
+(16, 1024, 1431655751, 718080)
+k = 496
+(12, 512, 880729, 235680*sqrt(2))
+k = 240
+(12, 512, 880729, 235680*sqrt(2))
+k = 240
+(16, 1024, 1431655751, 1037184)
+k = 496
+(16, 1024, 1431655751, 1037184)
+k = 496
+\begin{table}[htbp]
+	\centering
+	\setlength{\tabcolsep}{3pt}
+	\caption{Comparison of security levels and key sizes between our KEM and NewHope, where $| \pk |$ is the public key size, $| \sk |$ is the secret key size, $| \textit{ch} |$ is the encapsulated key size, $\beta$ is the blocksize, and $\lambda$ is the number of operations needed to break the scheme using classical algorithms.}
+	\begin{tabular}{crrrrrc}
+		\toprule
+		Parameter set & $|\pk|$ & $|\sk|$ & $|\ch|$ & $\beta$ & $\lambda$ & Assumption \\
+		\midrule
+		OurBW256g2 & $\sim 423.22$ KB & $704$ B & $800$ B & $352$ & $2^{360}$ & $\eta(\BW_{256}) \leq 1/4$ \\
+		OurBW512g2 & $\sim 1.85$ MB & $\sim 1.50$ KB & $\sim 1.66$ KB & $700$ & $2^{709}$ & $\eta(\BW_{512}) \leq 1/4$ \\
+		OurBW256g4 & $\sim 447.15$ KB & $704$ B & $800$ B & $265$ & $2^{273}$ & $\eta(\BW_{256}) \leq 1/2$ \\
+		OurBW512g4 & $\sim 1.94$ MB & $\sim 1.50$ KB & $\sim 1.66$ KB & $557$ & $2^{566}$ & $\eta(\BW_{512}) \leq 1/2$ \\
+		OurBW256g8 & $\sim 473.90$ KB & $768$ B & $800$ B & $201$ & $2^{208}$ & $\eta(\BW_{256}) \leq 1$ \\
+		OurBW512g8 & $\sim 2.05$ MB & $\sim 1.62$ KB & $\sim 1.66$ KB & $449$ & $2^{457}$ & $\eta(\BW_{512}) \leq 1$ \\
+		OurBW256g12 & $\sim 490.86$ KB & $832$ B & $800$ B & $173$ & $2^{180}$ & -- \\
+		OurBW512g12 & $\sim 2.11$ MB & $\sim 1.75$ KB & $\sim 1.66$ KB & $398$ & $2^{406}$ & -- \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+\begin{table}[htbp]
+	\centering
+	\setlength{\tabcolsep}{3pt}
+	\caption{Suggested parameter sets for our concrete KEM based on LIP.}
+	\begin{tabular}{crrrrrrrrr}
+		\toprule
+		Parameter set & $\LL$ & $\dim$ & $g$ & $\sim s$ & $q$ & $\hat{q}$ & $\hat{m}$ & $\beta$ & $|k|$ \\
+		\midrule
+		OurBW256g2 & $\BW_{256}$ & $512$ & $2$ & $51$ & $3430$ & $880729$ & $12$ & $54880*sqrt(2)$ & $240$ b \\
+		OurBW512g2 & $\BW_{512}$ & $1024$ & $2$ & $75$ & $7479$ & $1431655751$ & $16$ & $239328$ & $496$ b \\
+		OurBW256g4 & $\BW_{256}$ & $512$ & $4$ & $85$ & $2858$ & $880729$ & $12$ & $91456*sqrt(2)$ & $240$ b \\
+		OurBW512g4 & $\BW_{512}$ & $1024$ & $4$ & $125$ & $6233$ & $1431655751$ & $16$ & $398912$ & $496$ b \\
+		OurBW256g8 & $\BW_{256}$ & $512$ & $8$ & $152$ & $2556$ & $880729$ & $12$ & $163584*sqrt(2)$ & $240$ b \\
+		OurBW512g8 & $\BW_{512}$ & $1024$ & $8$ & $225$ & $5610$ & $1431655751$ & $16$ & $718080$ & $496$ b \\
+		OurBW256g12 & $\BW_{256}$ & $512$ & $12$ & $219$ & $2455$ & $880729$ & $12$ & $235680*sqrt(2)$ & $240$ b \\
+		OurBW512g12 & $\BW_{512}$ & $1024$ & $12$ & $325$ & $5402$ & $1431655751$ & $16$ & $1037184$ & $496$ b \\
+		\bottomrule
+	\end{tabular}
+\end{table}

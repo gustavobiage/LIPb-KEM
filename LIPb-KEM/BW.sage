@@ -10,14 +10,7 @@ PHI = GG(1 + I)
 def KroneckerProduct(A, B):
 	m, n = A.dimensions()
 	p, q = B.dimensions()
-	return block_matrix([[A[i, j] * B for j in range(n)] for i in range(m)], subdivide=False);
-
-# def BarnesWall(n):
-# 	 if n == 0:
-# 		 return matrix(GG, 1, [GG(1)])
-
-# 	 return block_matrix([[ BarnesWall(n-1), BarnesWall(n-1)],
-# 						  [0, PHI * BarnesWall(n-1)]])
+	return block_matrix([[A[i, j] * B for j in range(n)] for i in range(m)], subdivide=False)
 
 def BarnesWall(n):
 	BW = matrix(GG, 2, 2, [[1,	 1],
@@ -28,7 +21,7 @@ def BarnesWall(n):
 		BWN = KroneckerProduct(BWN, BW)
 
 	N, N = BWN.dimensions()
-	return (BWN, sqrt(N), sqrt(N)/4)
+	return (BWN, sqrt(N), sqrt(N)/2)
 
 def BWvector(B, LOWER_BOUND=-10, UPPER_BOUND=10):
 	N, N = B.dimensions()
@@ -167,39 +160,3 @@ def RMDec(r, t):
 		u = RMDec(r, tm)
 		return vector(ZZ, list(u) + list(u + v))
 
-# tries = 10
-# while tries > 0:
-# 	tries = tries - 1
-
-# 	BW, shortest_vector_length, rho = BarnesWall(5)
-# 	N, N = BW.dimensions()
-
-# 	BWZ = Utils.SortByColumnNorm(BasisOverZZ(BW))
-
-# 	s_ = max(v.norm() for v in Utils.GramSchmidt(BWZ)) * sqrt(ln(2 * 2 * N + 4)/pi)
-# 	s = ZZ(ceil(max(shortest_vector_length, s_)))
-
-# 	q_ = (s * N) / rho * sqrt(ln(2 * 2 * N + 4) / pi)
-# 	q = ZZ(ceil(q_))
-
-# 	standard_deviation = (q * rho) / sqrt(N)
-# 	c = zero_vector(ZZ, 2 * N)
-# 	error = VectorOverCC(Utils.SampleD(BWZ, standard_deviation, c) / q)
-# 	print(error)
-# 	#error = Error(BW)
-# 	#error = vector(GQ, 2, [QQ(1/5), 0])
-# 	#error = vector(GQ, 2, [QQ(1/100), 0])
-# 	#error = vector(GQ, N, [QQ(1/5)] + [0 for _ in range(N-1)])
-# 	assert error.norm()^2 < N/4 # Error must be decodable
-
-# 	bwvector = BWvector(BW) # Sample random vector in BW
-# 	#bwvector = vector(GG, 2, [9*I - 5, 5*I - 9])
-# 	#bwvector = vector(GG, 2, [12*I - 1, -2*I - 16])
-# 	#bwvector = vector(GG, 4, [-15*I + 20, -I + 9, -5*I + 13, -6*I + 4])
-	# assert Utils.isBWvector(BW, bwvector)
-
-# 	decodable_vector = bwvector + error
-# 	bwvector2 = ParBW(1, decodable_vector)
-# 	# print(bwvector)
-# 	# print(bwvector2)
-# 	assert bwvector == bwvector2
