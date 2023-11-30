@@ -1,0 +1,54 @@
+\begin{table}[htbp]
+	\centering
+	\setlength{\tabcolsep}{3pt}
+	\caption{Comparison of security levels and key sizes between our KEM and NewHope, where $| \pk |$ is the public key size, $| \sk |$ is the secret key size, $| \textit{ch} |$ is the encapsulated key size, $\beta$ is the blocksize, and $\lambda$ is the number of operations needed to break the scheme using classical algorithms.}
+	\begin{tabular}{crrrrrc}
+		\toprule
+		Parameter set & $|\pk|$ & $|\sk|$ & $|\ch|$ & $\beta$ & $\lambda$ & Assumption \\
+		\midrule
+		(IND-CPA KEM) OurBW256g2 & $\sim 439.25$ KB & $384$ KB & $\sim 781.88$ B & $352$ & $2^{111}$ & $\eta_{\sfrac{1}{2}}(\BW_{256}) \leq 1/4$ \\
+		(IND-CCA2 KEM) OurBW256g2 & $\sim 439.25$ KB & $\sim 384.01$ KB & $\sim 797.88$ B & $352$ & $2^{111}$ & $\eta_{\sfrac{1}{2}}(\BW_{256}) \leq 1/4$ \\
+		(IND-CPA KEM) OurBW512g2 & $\sim 1.91$ MB & $\sim 1.62$ MB & $\sim 1.65$ KB & $700$ & $2^{213}$ & $\eta_{\sfrac{1}{2}}(\BW_{512}) \leq 1/4$ \\
+		(IND-CCA2 KEM) OurBW512g2 & $\sim 1.91$ MB & $\sim 1.63$ MB & $\sim 1.68$ KB & $700$ & $2^{213}$ & $\eta_{\sfrac{1}{2}}(\BW_{512}) \leq 1/4$ \\
+		(IND-CPA KEM) OurBW256g4 & $\sim 463.18$ KB & $384$ KB & $\sim 778.62$ B & $265$ & $2^{85}$ & $\eta_{\sfrac{1}{2}}(\BW_{256}) \leq 1/2$ \\
+		(IND-CCA2 KEM) OurBW256g4 & $\sim 463.18$ KB & $\sim 384.01$ KB & $\sim 794.62$ B & $265$ & $2^{85}$ & $\eta_{\sfrac{1}{2}}(\BW_{256}) \leq 1/2$ \\
+		(IND-CPA KEM) OurBW512g4 & $\sim 2.00$ MB & $\sim 1.62$ MB & $\sim 1.65$ KB & $557$ & $2^{171}$ & $\eta_{\sfrac{1}{2}}(\BW_{512}) \leq 1/2$ \\
+		(IND-CCA2 KEM) OurBW512g4 & $\sim 2.00$ MB & $\sim 1.63$ MB & $\sim 1.68$ KB & $557$ & $2^{171}$ & $\eta_{\sfrac{1}{2}}(\BW_{512}) \leq 1/2$ \\
+		(IND-CPA KEM) OurBW256g8 & $\sim 489.93$ KB & $416$ KB & $\sim 776.25$ B & $201$ & $2^{66}$ & $\eta_{\sfrac{1}{2}}(\BW_{256}) \leq 1$ \\
+		(IND-CCA2 KEM) OurBW256g8 & $\sim 489.93$ KB & $\sim 416.01$ KB & $\sim 792.25$ B & $201$ & $2^{66}$ & $\eta_{\sfrac{1}{2}}(\BW_{256}) \leq 1$ \\
+		(IND-CPA KEM) OurBW512g8 & $\sim 2.11$ MB & $\sim 1.75$ MB & $\sim 1.64$ KB & $449$ & $2^{139}$ & $\eta_{\sfrac{1}{2}}(\BW_{512}) \leq 1$ \\
+		(IND-CCA2 KEM) OurBW512g8 & $\sim 2.11$ MB & $\sim 1.75$ MB & $\sim 1.67$ KB & $449$ & $2^{139}$ & $\eta_{\sfrac{1}{2}}(\BW_{512}) \leq 1$ \\
+		(IND-CPA KEM) OurBW256g12 & $\sim 506.89$ KB & $448$ KB & $\sim 775.12$ B & $173$ & $2^{57}$ & -- \\
+		(IND-CCA2 KEM) OurBW256g12 & $\sim 506.89$ KB & $\sim 448.01$ KB & $\sim 791.12$ B & $173$ & $2^{57}$ & -- \\
+		(IND-CPA KEM) OurBW512g12 & $\sim 2.17$ MB & $\sim 1.88$ MB & $\sim 1.64$ KB & $398$ & $2^{124}$ & -- \\
+		(IND-CCA2 KEM) OurBW512g12 & $\sim 2.17$ MB & $\sim 1.88$ MB & $\sim 1.66$ KB & $398$ & $2^{124}$ & -- \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+\begin{table}[htbp]
+	\centering
+	\setlength{\tabcolsep}{3pt}
+	\caption{Suggested parameter sets for our concrete KEM based on LIP.}
+	\begin{tabular}{crrrrrrrrr}
+		\toprule
+		Parameter set & $\LL$ & $\dim$ & $g$ & $\sim s$ & $q$ & $\hat{q}$ & $\hat{m}$ & $\beta$ & $|k|$ \\
+		\midrule
+		(IND-CPA KEM) OurBW256g2 & $\BW_{256}$ & $512$ & $2$ & $51$ & $3430$ & $880729$ & $12$ & $54880*sqrt(2)$ & $240$ b \\
+		(IND-CCA2 KEM) OurBW256g2 & $\BW_{256}$ & $512$ & $2$ & $51$ & $3430$ & $880729$ & $12$ & $54880*sqrt(2)$ & $111$ b \\
+		(IND-CPA KEM) OurBW512g2 & $\BW_{512}$ & $1024$ & $2$ & $75$ & $7479$ & $1431655751$ & $16$ & $239328$ & $496$ b \\
+		(IND-CCA2 KEM) OurBW512g2 & $\BW_{512}$ & $1024$ & $2$ & $75$ & $7479$ & $1431655751$ & $16$ & $239328$ & $213$ b \\
+		(IND-CPA KEM) OurBW256g4 & $\BW_{256}$ & $512$ & $4$ & $85$ & $2858$ & $880729$ & $12$ & $91456*sqrt(2)$ & $240$ b \\
+		(IND-CCA2 KEM) OurBW256g4 & $\BW_{256}$ & $512$ & $4$ & $85$ & $2858$ & $880729$ & $12$ & $91456*sqrt(2)$ & $85$ b \\
+		(IND-CPA KEM) OurBW512g4 & $\BW_{512}$ & $1024$ & $4$ & $125$ & $6233$ & $1431655751$ & $16$ & $398912$ & $496$ b \\
+		(IND-CCA2 KEM) OurBW512g4 & $\BW_{512}$ & $1024$ & $4$ & $125$ & $6233$ & $1431655751$ & $16$ & $398912$ & $171$ b \\
+		(IND-CPA KEM) OurBW256g8 & $\BW_{256}$ & $512$ & $8$ & $152$ & $2556$ & $880729$ & $12$ & $163584*sqrt(2)$ & $240$ b \\
+		(IND-CCA2 KEM) OurBW256g8 & $\BW_{256}$ & $512$ & $8$ & $152$ & $2556$ & $880729$ & $12$ & $163584*sqrt(2)$ & $66$ b \\
+		(IND-CPA KEM) OurBW512g8 & $\BW_{512}$ & $1024$ & $8$ & $225$ & $5610$ & $1431655751$ & $16$ & $718080$ & $496$ b \\
+		(IND-CCA2 KEM) OurBW512g8 & $\BW_{512}$ & $1024$ & $8$ & $225$ & $5610$ & $1431655751$ & $16$ & $718080$ & $139$ b \\
+		(IND-CPA KEM) OurBW256g12 & $\BW_{256}$ & $512$ & $12$ & $219$ & $2455$ & $880729$ & $12$ & $235680*sqrt(2)$ & $240$ b \\
+		(IND-CCA2 KEM) OurBW256g12 & $\BW_{256}$ & $512$ & $12$ & $219$ & $2455$ & $880729$ & $12$ & $235680*sqrt(2)$ & $57$ b \\
+		(IND-CPA KEM) OurBW512g12 & $\BW_{512}$ & $1024$ & $12$ & $325$ & $5402$ & $1431655751$ & $16$ & $1037184$ & $496$ b \\
+		(IND-CCA2 KEM) OurBW512g12 & $\BW_{512}$ & $1024$ & $12$ & $325$ & $5402$ & $1431655751$ & $16$ & $1037184$ & $124$ b \\
+		\bottomrule
+	\end{tabular}
+\end{table}
