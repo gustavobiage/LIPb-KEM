@@ -46,11 +46,11 @@ def SortByColumnNorm(B):
 
 def Rho(x, s, c):
 	return exp(-pi * Norm2(x - c)/ s^2)
-N = 128
+
 def T(n):
 	return log(n, 2)
 
-def SampleZ(s, c):
+def SampleZ(s, c, N=128):
 	lower_bound = ceil(c - s * T(N))
 	upper_bound = floor(c + s * T(N))
 	x = ZZ.random_element(lower_bound, upper_bound)

@@ -15,7 +15,6 @@ def KroneckerProduct(A, B):
 def BarnesWall(n):
 	BW = matrix(GG, 2, 2, [[1,	 1],
 					   	   [0, 1 + i]]);
-
 	BWN = BW
 	for _ in range(n-1):
 		BWN = KroneckerProduct(BWN, BW)
@@ -49,7 +48,7 @@ def isBWvector(B, v):
 	N, N = B.dimensions()
 	BZ = BasisOverZZ(B)
 	vz = VectorOverZZ(v)
-	return Utils.isLatticeVector(B, v)
+	return Utils.isLatticeVector(BZ, vz)
 
 def Error(B):
 	N, N = B.dimensions()
@@ -159,4 +158,3 @@ def RMDec(r, t):
 
 		u = RMDec(r, tm)
 		return vector(ZZ, list(u) + list(u + v))
-
